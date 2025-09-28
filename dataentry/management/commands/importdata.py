@@ -2,13 +2,13 @@ import csv
 from django.core.management.base import BaseCommand
 from dataentry.models import Student
 
-#Proposed command -python manage.py importdata file_path
+#Proposed command -python manage.py importdata file_path model_path
 class Command(BaseCommand):
     help="Import data from the CSV FILE "
 
     def add_arguments(self, parser):
         parser.add_argument('file_path',type=str, help='CSV file path')
-        
+        parser.add_argument('model_name',type=str,help="Name of the model")
         
     def handle(self,*args, **kwargs):
         #logic will goes here
