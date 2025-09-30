@@ -1,5 +1,6 @@
 import csv
-from django.core.management.base import BaseCommand
+from django.apps import apps
+from django.core.management.base import BaseCommand, CommandError
 from dataentry.models import Student
 
 #Proposed command -python manage.py importdata file_path model_path
@@ -14,8 +15,24 @@ class Command(BaseCommand):
         #logic will goes here
         
         file_path=kwargs['file_path'] 
+        model_name=kwargs['model_name']
+        
+        #Search for the model across all installed apps
+        model=None
+        for appconfig in apps.get_app_configs():
+             #Try to search for the model
+             try:
+                model=apps.get_model(appconfig.label,model_name)
+                break #stop searching once the model is found 
+             except LookupError:
+                continue # model not found this app, cotinue searching in next app.
+        if not model:
+            raise CommandError(f"Model {model_name} not found in any app!")
+            
+                
+                
         with open(file_path,'r') as file:
             reader=csv.DictReader(file) # coverts all records in the csv file  in the form of list of dictionaries.And consider first row as column header.
             for row in reader:
-                Student.objects.create(**row)
+                model.objects.create(**row)
         self.stdout.write(self.style.SUCCESS( "Data imported from csv successfully✅"))
